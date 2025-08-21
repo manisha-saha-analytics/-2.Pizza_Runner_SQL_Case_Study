@@ -1,60 +1,79 @@
 # -2.Pizza_Runner_SQL_Case_Study
 "SQL case study analyzing pizza orders using joins,group by, window functions and case statements."
 
-🍕 Pizza Runner SQL Case Study – Part A: Pizza Metrics
-This project is part of the famous 8 Week SQL Challenge by Danny Ma.
-I solved Part A: Pizza Metrics to practice real-world SQL queries and strengthen my data analytics skills.
+# 🍕 Pizza Runner SQL Case Study – Full Solutions (Part A, B & C)
 
-📌 Case Study Background
-Danny launched Pizza Runner, a startup where runners deliver fresh pizzas.
-The goal of this case study is to analyze customer orders, runners, and pizza details using SQL queries.
+This project is part of the famous **[8 Week SQL Challenge](https://8weeksqlchallenge.com/)** by Danny Ma.  
+I worked on **Pizza Runner Case Study**, solving SQL queries step by step.
 
-📝 Questions Solved
-1.How many pizzas were ordered?
+---
 
-2.How many unique customer orders were made?
+## 📌 Case Study Background  
+Danny launched **Pizza Runner**, a startup where runners deliver fresh pizzas.  
 
-3.How many successful orders were delivered by each runner?
+Using SQL, I explored different business problems:  
+- **Part A: Pizza Metrics** → Analyzing basic order & customer data  
+- **Part B: Runner & Customer Experience** → Evaluating runner performance and delivery times  
+- **Part C: Ingredient Optimisation** → Finding insights on popular ingredients, exclusions & extras  
+- **Part D: Pricing & Ratings** → Estimating pizza prices, calculating revenue & customer ratings  
 
-4.How many of each type of pizza was delivered?
+---
 
-5.How many Vegetarian and Meatlovers pizzas were ordered by each customer?
+## 📝 Parts Completed  
 
-6.What was the maximum number of pizzas delivered in a single order?
+### ✅ Part A: Pizza Metrics
+- How many pizzas were ordered?  
+- How many unique customer orders were made?  
+- How many successful orders were delivered by each runner?  
+- How many of each type of pizza was delivered?  
+- … (total 10 questions solved)
 
-7.For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
+### ✅ Part B: Runner and Customer Experience
+- How many runners signed up each week?  
+- How many successful deliveries were made by each runner?  
+- What was the average time it took for each runner to pickup the order?  
+- What was the average speed for each runner?  
+- … (7 questions solved)
 
-8.How many pizzas were delivered that had both exclusions and extras?
+### ✅ Part C: Ingredient Optimisation
+- What are the most commonly added extras?  
+- Which exclusions do customers prefer the most?  
+- What ingredient combinations are the most popular?  
+- … (6 questions solved)
 
-9.What was the total volume of pizzas ordered for each hour of the day?
+---
 
-10.What was the volume of orders for each day of the week?
+## 📂 SQL Concepts Used  
+- Joins (INNER, LEFT)  
+- Aggregations (`COUNT`, `SUM`, `AVG`, `MAX`)  
+- Date/time functions (`AGE`, `EXTRACT`, `DATE_TRUNC`)  
+- Conditional logic with `CASE`  
+- Window functions (`ROW_NUMBER`, `RANK`)
+- Conditional Logic (CASE Statements)
+- ANY Operator
+- String Manipulation Functions
+-   
 
-📂 SQL Concepts Used
--COUNT, DISTINCT
+---
 
--GROUP BY & ORDER BY
+## 🎯 Learnings  
+✔ Handling messy data (NULLs, blanks, cancellations)  
+✔ Improved confidence with **date/time calculations**  
+✔ Learned to apply **real business metrics with SQL**  
+✔ Built strong problem-solving skills with SQL  
+✔ Practiced **real-world ingredient optimization** for decision making  
 
--CASE statements for conditional logic
+---
 
--INNER JOIN between multiple tables
+## 🔗 Next Steps  
+I’ll continue with:  
+- **Part D: Pricing and Ratings**  
+- **Part E: Bonus Questions**  
 
--Date and time functions
+Stay tuned for updates! 🚀  
 
+---
 
-🎯 Learnings
-✔ Improved my ability to write aggregation queries
-✔ Practiced data cleaning logic using CASE
-✔ Learned how to handle business-style SQL questions
-
-🔗 Next Steps
-I’ll continue with:
-
-Part B: Runner and Customer Experience
-
-Part C: Ingredient Optimisation
-
-Stay tuned for updates! 🚀
-
-#️⃣ Tags
+#️⃣ Tags  
+`#SQL` `#DataAnalytics` `#PizzaRunner` `#LearningJourney`
 #SQL #DataAnalytics #PizzaRunner #LearningJourney
