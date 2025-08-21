@@ -1,3 +1,6 @@
+---------------------Pizza Runner Schemas------------------------
+
+
 
 DROP TABLE IF EXISTS customer_orders;
 CREATE TABLE customer_orders (
@@ -98,7 +101,9 @@ VALUES
   (11, 'Tomatoes'),
   (12, 'Tomato Sauce');
 
-     --A.Pizza Metrics--
+     -------------------------------------------A.Pizza Metrics------------------------------------------
+
+
 --Q1.How many pizzas were ordered?
 
 SELECT COUNT(*) as total_pizza_orders
@@ -205,4 +210,5 @@ FROM(
 	GROUP BY runner_id
 	HAVING COUNT(DISTINCT order_id) = 1
 ) AS single_order_runner;
+
 
