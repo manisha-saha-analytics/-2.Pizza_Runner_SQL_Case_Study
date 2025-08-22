@@ -1,0 +1,189 @@
+---------------------------D. Pricing and Ratings-----------------------------------
+
+--Q1.If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes 
+-- how much money has Pizza Runner made so far if there are no delivery fees?
+
+SELECT 
+	SUM(CASE
+			WHEN pn.pizza_name = 'Meat Lovers' THEN 12
+			WHEN pn.pizza_name = 'Vegetarian' THEN 10
+			ELSE 0
+			END) As total_revenue
+	FROM customer_orders AS co
+
+INNER JOIN runner_orders AS ro
+ON co.order_id = ro.order_id
+
+INNER JOIN pizza_names AS pn
+ON co.pizza_id = pn.pizza_id
+
+WHERE ro.cancellation IS NULL OR ro.cancellation = '' OR ro.cancellation ='null';
+
+--Q2.What if there was an additional $1 charge for any pizza extras?
+--Add cheese is $1 extras
+
+WITH successful_orders AS(
+	SELECT
+		co.order_id,
+		co.pizza_id,
+		co.exclusions,
+		CASE WHEN co.extras IS NULL OR co.extras = '' OR co.extras = 'null' THEN NULL END AS extras_cleaned
+	FROM customer_orders AS co
+
+	JOIN runner_orders as ro
+	ON co.order_id = ro.order_id
+
+	WHERE ro.cancellation IS NULL OR ro.cancellation = '' OR ro.cancellation = 'null'
+),
+
+extra_counts AS (
+    SELECT
+        so.order_id,
+        so.pizza_id,
+        CASE WHEN so.extras_cleaned IS NOT NULL THEN
+            -- Count the number of extras by splitting the string and counting elements
+            ARRAY_LENGTH(string_to_array(so.extras_cleaned, ','), 1)
+        ELSE 0
+        END AS num_extras
+    FROM
+        successful_orders so
+)
+
+SELECT
+    SUM(CASE
+        WHEN pn.pizza_name = 'Meatlovers' THEN 12
+        WHEN pn.pizza_name = 'Vegetarian' THEN 10
+        ELSE 0
+    END) + SUM(ec.num_extras * 1) AS total_revenue_with_extras
+FROM
+    successful_orders AS so
+JOIN
+    pizza_names AS pn ON so.pizza_id = pn.pizza_id
+LEFT JOIN -- Use LEFT JOIN since not all orders will have extras
+    extra_counts AS ec ON so.order_id = ec.order_id AND so.pizza_id = ec.pizza_id;
+
+--Q3. The Pizza Runner team now wants to add an additional ratings system that allows customers to rate their runner, 
+--how would you design an additional table for this new dataset 
+-- generate a schema for this new table and insert your own data for ratings 
+--for each successful customer order between 1 to 5.
+
+CREATE TABLE runner_ratings (
+    rating_id SERIAL PRIMARY KEY,  
+    order_id INTEGER NOT NULL,     
+    runner_id INTEGER NOT NULL,    
+    rating INTEGER NOT NULL,       
+    rating_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+    comments TEXT                  
+);
+
+INSERT INTO runner_ratings (order_id, runner_id, rating, comments)
+SELECT
+    ro.order_id,
+    ro.runner_id,
+    CASE ro.order_id
+        WHEN 1 THEN 4
+        WHEN 2 THEN 5
+        WHEN 3 THEN 3
+        WHEN 4 THEN 2
+        WHEN 5 THEN 5
+        WHEN 7 THEN 4
+        WHEN 8 THEN 1
+        WHEN 10 THEN 3
+        ELSE (random() * 4 + 1)::int -- Assign random ratings between 1 and 5
+    END AS rating,
+    CASE ro.order_id
+        WHEN 1 THEN 'Fast delivery, driver was friendly.'
+        WHEN 2 THEN 'Excellent service! Pizza was still hot.'
+        WHEN 3 THEN 'A bit slow, but the pizza was correct.'
+        WHEN 4 THEN 'Long wait, pizza was lukewarm.'
+        WHEN 5 THEN 'Perfect in every way.'
+        WHEN 7 THEN 'Good service, no issues.'
+        WHEN 8 THEN 'Very disappointed with the delivery time.'
+        WHEN 10 THEN 'Driver was polite, but delivery was average.'
+        ELSE NULL
+    END AS comments
+FROM
+    runner_orders AS ro
+WHERE
+    ro.cancellation IS NULL OR ro.cancellation = '' OR ro.cancellation = 'null'
+ORDER BY
+    ro.order_id;
+
+--Q4.Using your newly generated table - can you join all of the information together to form a table which has the following information for successful deliveries?
+--customer_id
+--order_id
+--runner_id
+--rating
+--order_time
+--pickup_time
+--Time between order and pickup
+--Delivery duration
+--Average speed
+--Total number of pizzas
+
+SELECT
+    co.customer_id,
+    co.order_id,
+    ro.runner_id,
+    rr.rating,
+    co.order_time,
+    CAST(ro.pickup_time AS TIMESTAMP) AS pickup_time, -- Convert to TIMESTAMP for calculations
+    EXTRACT(EPOCH FROM (CAST(ro.pickup_time AS TIMESTAMP) - co.order_time)) / 60 AS time_between_order_and_pickup_minutes, -- Calculate in minutes
+    CAST(REGEXP_REPLACE(ro.duration, '[^0-9]', '', 'g') AS INTEGER) AS delivery_duration_minutes, -- Clean and cast to INTEGER
+    ROUND(
+        (CAST(REGEXP_REPLACE(ro.distance, '[^0-9.]', '', 'g') AS DECIMAL(10,2)) / (CAST(REGEXP_REPLACE(ro.duration, '[^0-9]', '', 'g') AS INTEGER) / 60.0)),
+        2
+    ) AS average_speed_km_per_hour, -- Calculate and round average speed
+    COUNT(co.pizza_id) AS total_number_of_pizzas -- Count pizzas for each order
+FROM
+    customer_orders AS co
+JOIN
+    runner_orders AS ro ON co.order_id = ro.order_id
+JOIN
+    runner_ratings AS rr ON co.order_id = rr.order_id AND ro.runner_id = rr.runner_id
+WHERE
+    ro.cancellation IS NULL OR ro.cancellation = '' OR ro.cancellation = 'null' -- Filter for successful deliveries
+GROUP BY
+    co.customer_id, co.order_id, ro.runner_id, rr.rating, co.order_time, ro.pickup_time, ro.distance, ro.duration -- Group by necessary columns for aggregation
+ORDER BY
+    co.order_id;
+
+--Q5. If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?
+
+WITH successful_pizza_costs AS (
+    SELECT
+        co.order_id,
+        CASE
+            WHEN pn.pizza_name = 'Meatlovers' THEN 12
+            WHEN pn.pizza_name = 'Vegetarian' THEN 10
+            ELSE 0
+        END AS pizza_cost
+    FROM
+        customer_orders AS co
+    JOIN
+        runner_orders AS ro ON co.order_id = ro.order_id
+    JOIN
+        pizza_names AS pn ON co.pizza_id = pn.pizza_id
+    WHERE
+        ro.cancellation IS NULL OR ro.cancellation = '' OR ro.cancellation = 'null'
+),
+runner_fees AS (
+    SELECT
+        ro.order_id,
+        CAST(REGEXP_REPLACE(ro.distance, '[^0-9.]', '', 'g') AS DECIMAL(10,2)) * 0.30 AS runner_fee
+    FROM
+        runner_orders AS ro
+    WHERE
+        ro.cancellation IS NULL OR ro.cancellation = '' OR ro.cancellation = 'null'
+)
+SELECT
+    SUM(tpc.pizza_cost) - SUM(rf.runner_fee) AS money_left_over
+FROM
+    successful_pizza_costs AS tpc
+LEFT JOIN
+    runner_fees AS rf ON tpc.order_id = rf.order_id;
+
+
+
+
+
